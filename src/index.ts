@@ -1,5 +1,6 @@
 import { GelatoRelay, RelayResponse } from "@gelatonetwork/relay-sdk";
 import { BigNumber, BytesLike, ethers } from "ethers";
+
 import {
   EIP712_SAFE_TX_TYPE,
   FALLBACK_HANDLER_ADDRESS,
@@ -27,7 +28,7 @@ export class GelatoSmartWallet {
   private _address: string | undefined;
   private _chainId: number | undefined;
   private _apiKey: string;
-  private _isInitialized: boolean = false;
+  private _isInitialized = false;
 
   // Contract Interfaces
   private readonly _gnosisSafeInterface: GnosisSafeInterface =
