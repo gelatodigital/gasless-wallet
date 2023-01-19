@@ -23,19 +23,19 @@ export interface SmartWalletConfig {
   apiKey: string;
 }
 export class GelatoSmartWallet {
-  private readonly _provider: ethers.providers.Web3Provider;
-  private _gelatoRelay: GelatoRelay;
-  private _address: string | undefined;
-  private _chainId: number | undefined;
-  private _apiKey: string;
-  private _isInitialized = false;
+  readonly #provider: ethers.providers.Web3Provider;
+  #gelatoRelay: GelatoRelay;
+  #address: string | undefined;
+  #chainId: number | undefined;
+  #apiKey: string;
+  #isInitialized = false;
 
   // Contract Interfaces
-  private readonly _gnosisSafeInterface: GnosisSafeInterface =
+  readonly #gnosisSafeInterface: GnosisSafeInterface =
     GnosisSafe__factory.createInterface();
-  private readonly _gnosisSafeProxyFactoryInterface: GnosisSafeProxyFactoryInterface =
+  readonly #gnosisSafeProxyFactoryInterface: GnosisSafeProxyFactoryInterface =
     GnosisSafeProxyFactory__factory.createInterface();
-  private readonly _multiCallInterface: MultiCallInterface =
+  readonly #multiCallInterface: MultiCallInterface =
     MultiCall__factory.createInterface();
 
   constructor(
@@ -44,29 +44,30 @@ export class GelatoSmartWallet {
       | ethers.providers.JsonRpcFetchFunc,
     config: SmartWalletConfig
   ) {
-    this._gelatoRelay = new GelatoRelay();
-    this._provider = new ethers.providers.Web3Provider(eoaProvider);
-    this._apiKey = config.apiKey;
+    this.#gelatoRelay = new GelatoRelay();
+    this.#provider = new ethers.providers.Web3Provider(eoaProvider);
+    this.#apiKey = config.apiKey;
   }
 
   public async init() {
-    this._address = await this._calculateSmartWalletAddress();
-    this._chainId = (await this._provider.getNetwork()).chainId;
-    if (!this._address || !this._chainId) {
+    this.#address = await this._calculateSmartWalletAddress();
+    this.#chainId = (await this.#provider.getNetwork()).chainId;
+    if (!this.#address || !this.#chainId) {
       throw new Error(
-        `GelatoSmartWallet could not be initialized: address[${this._address}] chainId[${this._chainId}]`
+        `GelatoSmartWallet could not be initialized: address[${
+          this.#address
+        }] chainId[${this.#chainId}]`
       );
     }
-    this._isInitialized = true;
-    console.log("GelatoSmartWallet is initialized");
+    this.#isInitialized = true;
   }
 
   public isInitialized(): boolean {
-    return this._isInitialized;
+    return this.#isInitialized;
   }
 
   public getAddress() {
-    return this._address;
+    return this.#address;
   }
 
   public async isDeployed() {
@@ -77,47 +78,46 @@ export class GelatoSmartWallet {
     to: string,
     data: string
   ): Promise<RelayResponse> {
-    if (!this.isInitialized() || !this._address || !this._chainId) {
+    if (!this.isInitialized() || !this.#address || !this.#chainId) {
       throw new Error("GelatoSmartWallet is not initialized");
     }
     if (await this._checkIfDeployed()) {
-      return await this._gelatoRelay.sponsoredCall(
+      return await this.#gelatoRelay.sponsoredCall(
         {
-          chainId: this._chainId,
-          target: this._address,
+          chainId: this.#chainId,
+          target: this.#address,
           data: await this._getExecTransactionData(to, data),
         },
-        this._apiKey
+        this.#apiKey
       );
     }
-    console.log("Deploying Safe and Executing Transaction");
     const calls: Multicall2.CallStruct[] = [
       {
         target: GNOSIS_SAFE_PROXY_FACTORY,
         callData: await this._getCreateProxyData(),
       },
       {
-        target: this._address,
+        target: this.#address,
         callData: await this._getExecTransactionData(to, data),
       },
     ];
-    const multiCallData = this._multiCallInterface.encodeFunctionData(
+    const multiCallData = this.#multiCallInterface.encodeFunctionData(
       "aggregate",
       [calls]
     );
-    return await this._gelatoRelay.sponsoredCall(
+    return await this.#gelatoRelay.sponsoredCall(
       {
-        chainId: this._chainId,
-        target: getMultiCallContractAddress(this._chainId),
+        chainId: this.#chainId,
+        target: getMultiCallContractAddress(this.#chainId),
         data: multiCallData,
       },
-      this._apiKey
+      this.#apiKey
     );
   }
 
   private async _getExecTransactionData(to: string, data: string) {
     const signature = await this._getSignedTransactionHash(to, data);
-    return this._gnosisSafeInterface.encodeFunctionData("execTransaction", [
+    return this.#gnosisSafeInterface.encodeFunctionData("execTransaction", [
       to,
       0, //TODO: Should we enable this??
       data as BytesLike,
@@ -132,16 +132,19 @@ export class GelatoSmartWallet {
   }
 
   private async _getSignedTransactionHash(to: string, data: string) {
+    if (!this.isInitialized() || !this.#address || !this.#chainId) {
+      throw new Error("GelatoSmartWallet is not initialized");
+    }
     const nonce = (await this.isDeployed())
       ? (
           await GnosisSafe__factory.connect(
-            this._address!,
-            this._provider
+            this.#address,
+            this.#provider
           ).nonce()
         ).toNumber()
       : 0;
     const transactionHash = await this._getTransactionHash(to, data, nonce);
-    const signedMessage = await this._provider
+    const signedMessage = await this.#provider
       .getSigner()
       .signMessage(ethers.utils.arrayify(transactionHash));
     return adjustVInSignature(signedMessage);
@@ -161,24 +164,27 @@ export class GelatoSmartWallet {
       nonce,
     };
     return ethers.utils._TypedDataEncoder.hash(
-      { verifyingContract: this._address, chainId: this._chainId },
+      { verifyingContract: this.#address, chainId: this.#chainId },
       EIP712_SAFE_TX_TYPE,
       safeTx
     );
   }
 
   private async _getCreateProxyData(): Promise<string> {
-    return this._gnosisSafeProxyFactoryInterface.encodeFunctionData(
+    return this.#gnosisSafeProxyFactoryInterface.encodeFunctionData(
       "createProxyWithNonce",
-      [GNOSIS_SAFE, await this._getInitializer(), BigNumber.from(SALT)]
+      [GNOSIS_SAFE, await this._getSafeInitializer(), BigNumber.from(SALT)]
     );
   }
 
   private async _checkIfDeployed(): Promise<boolean> {
+    if (!this.isInitialized() || !this.#address || !this.#chainId) {
+      throw new Error("GelatoSmartWallet is not initialized");
+    }
     try {
       await GnosisSafe__factory.connect(
-        this._address!,
-        this._provider
+        this.#address,
+        this.#provider
       ).deployed();
       return true;
     } catch (error) {
@@ -192,7 +198,7 @@ export class GelatoSmartWallet {
       [
         await GnosisSafeProxyFactory__factory.connect(
           GNOSIS_SAFE_PROXY_FACTORY,
-          this._provider
+          this.#provider
         ).proxyCreationCode(),
         GNOSIS_SAFE,
       ]
@@ -202,7 +208,7 @@ export class GelatoSmartWallet {
       [
         ethers.utils.solidityKeccak256(
           ["bytes"],
-          [await this._getInitializer()]
+          [await this._getSafeInitializer()]
         ),
         SALT,
       ]
@@ -214,9 +220,9 @@ export class GelatoSmartWallet {
     );
   }
 
-  private async _getInitializer(): Promise<string> {
-    const owner = await this._provider.getSigner().getAddress();
-    return this._gnosisSafeInterface.encodeFunctionData("setup", [
+  private async _getSafeInitializer(): Promise<string> {
+    const owner = await this.#provider.getSigner().getAddress();
+    return this.#gnosisSafeInterface.encodeFunctionData("setup", [
       [owner],
       BigNumber.from(1),
       ZERO_ADDRESS,
