@@ -1,5 +1,5 @@
 import { GelatoRelay, RelayResponse } from "@gelatonetwork/relay-sdk";
-import { BigNumber, BytesLike, ethers } from "ethers";
+import { BigNumber, BigNumberish, BytesLike, ethers } from "ethers";
 
 import {
   EIP712_SAFE_TX_TYPE,
@@ -76,7 +76,8 @@ export class GelatoSmartWallet {
 
   public async sendTransaction(
     to: string,
-    data: string
+    data: string,
+    value: BigNumberish = 0
   ): Promise<RelayResponse> {
     if (!this.isInitialized() || !this.#address || !this.#chainId) {
       throw new Error("GelatoSmartWallet is not initialized");
@@ -86,7 +87,7 @@ export class GelatoSmartWallet {
         {
           chainId: this.#chainId,
           target: this.#address,
-          data: await this._getExecTransactionData(to, data),
+          data: await this._getExecTransactionData(to, data, value),
         },
         this.#apiKey
       );
@@ -98,7 +99,7 @@ export class GelatoSmartWallet {
       },
       {
         target: this.#address,
-        callData: await this._getExecTransactionData(to, data),
+        callData: await this._getExecTransactionData(to, data, value),
       },
     ];
     const multiCallData = this.#multiCallInterface.encodeFunctionData(
@@ -115,11 +116,15 @@ export class GelatoSmartWallet {
     );
   }
 
-  private async _getExecTransactionData(to: string, data: string) {
-    const signature = await this._getSignedTransactionHash(to, data);
+  private async _getExecTransactionData(
+    to: string,
+    data: string,
+    value: BigNumberish
+  ) {
+    const signature = await this._getSignedTransactionHash(to, data, value);
     return this.#gnosisSafeInterface.encodeFunctionData("execTransaction", [
       to,
-      0, //TODO: Should we enable this??
+      value,
       data as BytesLike,
       0,
       0,
@@ -131,7 +136,11 @@ export class GelatoSmartWallet {
     ]);
   }
 
-  private async _getSignedTransactionHash(to: string, data: string) {
+  private async _getSignedTransactionHash(
+    to: string,
+    data: string,
+    value: BigNumberish
+  ) {
     if (!this.isInitialized() || !this.#address || !this.#chainId) {
       throw new Error("GelatoSmartWallet is not initialized");
     }
@@ -143,17 +152,27 @@ export class GelatoSmartWallet {
           ).nonce()
         ).toNumber()
       : 0;
-    const transactionHash = await this._getTransactionHash(to, data, nonce);
+    const transactionHash = await this._getTransactionHash(
+      to,
+      data,
+      value,
+      nonce
+    );
     const signedMessage = await this.#provider
       .getSigner()
       .signMessage(ethers.utils.arrayify(transactionHash));
     return adjustVInSignature(signedMessage);
   }
 
-  private async _getTransactionHash(to: string, data: string, nonce: number) {
+  private async _getTransactionHash(
+    to: string,
+    data: string,
+    value: BigNumberish,
+    nonce: number
+  ) {
     const safeTx = {
       to,
-      value: 0,
+      value,
       data,
       operation: 0,
       safeTxGas: 0,
