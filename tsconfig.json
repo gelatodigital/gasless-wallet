@@ -10,11 +10,7 @@
     "module": "commonjs",
     "resolveJsonModule": true,
     "typeRoots": ["./node_modules/@types"],
-    "outDir": "dist",
-    "rootDir": "src",
     "declaration": true,
     "useUnknownInCatchVariables": false
-  },
-  "include": ["src/**/*.ts", "src/**/*.d.ts"],
-  "exclude": ["node_modules"]
+  }
 }

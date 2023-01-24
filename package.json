@@ -1,44 +1,16 @@
 {
-  "name": "@gelatonetwork/account-abstraction",
-  "version": "1.0.2-1",
-  "description": "SDK for Account Abstraction",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
-  "files": [
-    "dist/**/*"
+  "name": "root",
+  "private": true,
+  "workspaces": [
+    "packages/*"
   ],
-  "license": "ISC",
   "scripts": {
-    "build": "rm -rf dist && yarn run generate:contracts:typings && yarn tsc",
-    "format:check": "prettier --check \"*/**/*.{js,json,md,ts}\"",
-    "generate:contracts:typings": "yarn typechain --target=ethers-v5 --out-dir src/contracts/types src/contracts/abis/*.json",
-    "format": "prettier --write */**/*.{js,json,md,ts}",
-    "lint": "eslint --cache .",
-    "prepare": "husky install"
-  },
-  "dependencies": {
-    "@gelatonetwork/relay-sdk": "3.1.0",
-    "@typechain/ethers-v5": "10.2.0",
-    "ethers": "5.7.2",
-    "typechain": "8.1.1"
+    "setup-dev": "yarn install && yarn link-all && yarn build",
+    "build": "lerna run build",
+    "link-all": "lerna exec --parallel yarn link",
+    "unlink-all": "lerna exec --parallel --bail=false yarn unlink"	
   },
   "devDependencies": {
-    "@tsconfig/recommended": "1.0.1",
-    "@types/node": "18.11.18",
-    "@typescript-eslint/eslint-plugin": "5.30.0",
-    "@typescript-eslint/parser": "5.30.0",
-    "eslint": "8.18.0",
-    "eslint-config-prettier": "8.5.0",
-    "eslint-import-resolver-typescript": "3.1.3",
-    "eslint-plugin-import": "2.26.0",
-    "eslint-plugin-prettier": "4.1.0",
-    "husky": "8.0.1",
-    "lint-staged": "13.0.3",
-    "prettier": "2.7.1",
-    "typescript": "4.9.4"
-  },
-  "lint-staged": {
-    "*.{js,json,md,ts}": "yarn format",
-    "*.{ts,js}": "yarn lint"
+    "lerna": "^6.4.1"
   }
 }
