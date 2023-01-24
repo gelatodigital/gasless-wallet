@@ -1,0 +1,69 @@
+{
+  "parser": "@typescript-eslint/parser",
+  "env": {
+    "node": true
+  },
+  "plugins": ["@typescript-eslint", "prettier", "import"],
+  "extends": [
+    "eslint:recommended",
+    "plugin:@typescript-eslint/recommended",
+    "plugin:@typescript-eslint/eslint-recommended",
+    "plugin:import/recommended",
+    "plugin:import/typescript",
+    "prettier"
+  ],
+  "rules": {
+    "prettier/prettier": "error",
+    "no-console": "warn",
+    "import/order": ["error", { "newlines-between": "always" }],
+    "@typescript-eslint/no-unused-vars": "error",
+    "@typescript-eslint/no-explicit-any": "error",
+    "@typescript-eslint/no-var-requires": "error",
+    "@typescript-eslint/naming-convention": [
+      "error",
+      {
+        "selector": "variable",
+        "format": ["camelCase", "UPPER_CASE"],
+        "leadingUnderscore": "allow",
+        "trailingUnderscore": "allow"
+      },
+      {
+        "selector": "parameter",
+        "format": ["camelCase"],
+        "leadingUnderscore": "allow"
+      },
+      {
+        "selector": ["classProperty"],
+        "modifiers": ["private", "static"],
+        "format": ["PascalCase", "UPPER_CASE"]
+      },
+      {
+        "selector": ["classProperty"],
+        "modifiers": ["public", "static"],
+        "format": ["PascalCase", "UPPER_CASE"]
+      },
+      {
+        "selector": ["classProperty", "classMethod"],
+        "modifiers": ["private"],
+        "format": ["camelCase"],
+        "leadingUnderscore": "require"
+      },
+      {
+        "selector": ["classProperty", "classMethod"],
+        "modifiers": ["protected"],
+        "format": ["camelCase"],
+        "leadingUnderscore": "require"
+      }
+    ]
+  },
+  "settings": {
+    "import/parsers": {
+      "@typescript-eslint/parser": [".ts"]
+    },
+    "import/resolver": {
+      "typescript": {
+        "alwaysTryTypes": true
+      }
+    }
+  }
+}
