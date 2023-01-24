@@ -1,10 +1,5 @@
 {
   "parser": "@typescript-eslint/parser",
-  "parserOptions": {
-    "ecmaVersion": "12",
-    "sourceType": "module",
-    "project": "./tsconfig.json"
-  },
   "env": {
     "node": true
   },
@@ -17,7 +12,6 @@
     "plugin:import/typescript",
     "prettier"
   ],
-  "ignorePatterns": ["src/contracts/*", "dist/*"],
   "rules": {
     "prettier/prettier": "error",
     "no-console": "warn",

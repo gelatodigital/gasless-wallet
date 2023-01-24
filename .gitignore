@@ -8,11 +8,6 @@ node_modules
 # npm
 .npmrc
 
-# hardhat
-artifacts
-cache
-deployments/localhost
-
 # cache
 .eslintcache
 
@@ -23,21 +18,8 @@ deployments/localhost
 .DS_Store
 *.icloud
 
-dist
-.idea
-
-# redis
-dump.rdb
-
-# coverage
-coverage
-.nyc_output
-
-# typechain
-typechain
-
-test/contracts/types
-src/logs/
-
 # yarn
 yarn-error.log
+
+dist
+.idea
