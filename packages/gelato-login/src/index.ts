@@ -55,6 +55,7 @@ export class GelatoLogin {
     const walletConnectV1Adapter = new WalletConnectV1Adapter({
       clientId: CLIENT_ID,
     });
+    
     const metamaskAdapter = new MetamaskAdapter({
       clientId: CLIENT_ID,
     });
