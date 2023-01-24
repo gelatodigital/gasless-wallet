@@ -1,6 +1,6 @@
 {
   "name": "@gelatonetwork/smart-login",
-  "version": "1.0.0",
+  "version": "1.0.3",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "files": [
@@ -15,7 +15,7 @@
   },
   "dependencies": {
     "@gelatonetwork/account-abstraction": "*",
-    "@gelatonetwork/login": "*",
+    "@gelatonetwork/login": "^1.0.3",
     "@web3auth/modal": "^4.2.3"
   },
   "devDependencies": {
