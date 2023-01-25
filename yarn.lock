@@ -425,16 +425,6 @@
   resolved "https://registry.yarnpkg.com/@gar/promisify/-/promisify-1.1.3.tgz#555193ab2e3bb3b6adc3d551c9c030d9e860daf6"
   integrity sha512-k2Ty1JcVojjJFwrg/ThKi2ujJ7XNLYaFGNB/bWT9wGR+oSMJHMa5w+CUq6p/pVrKeNNgA7pCqEcjSnHVoqJQFw==
 
-"@gelatonetwork/account-abstraction@*":
-  version "1.0.1"
-  resolved "https://registry.yarnpkg.com/@gelatonetwork/account-abstraction/-/account-abstraction-1.0.1.tgz#e10aa15f8f40dea6660c86ce0ef18f9f569ee46d"
-  integrity sha512-1NG/a1QhafMviI/MJRIwCO0nve+BGCW9yI46QNbgYZt+z9kx2fRLGD88xYIGq3myZpocECPwJQm0euAW+6tFOw==
-  dependencies:
-    "@gelatonetwork/relay-sdk" "3.1.0"
-    "@typechain/ethers-v5" "10.2.0"
-    ethers "5.7.2"
-    typechain "8.1.1"
-
 "@gelatonetwork/relay-sdk@3.1.0":
   version "3.1.0"
   resolved "https://registry.yarnpkg.com/@gelatonetwork/relay-sdk/-/relay-sdk-3.1.0.tgz#30a01c05d033f55cf8b710d6bf075841b9b72abd"
