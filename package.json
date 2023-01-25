@@ -5,10 +5,10 @@
     "packages/*"
   ],
   "scripts": {
-    "setup-dev": "yarn install && yarn link-all && yarn build",
     "build": "lerna run build",
+    "setup-dev": "yarn install && yarn link-all && yarn build",
     "link-all": "lerna exec --parallel yarn link",
-    "unlink-all": "lerna exec --parallel --bail=false yarn unlink"	
+    "unlink-all": "lerna exec --parallel --bail=false yarn unlink"
   },
   "devDependencies": {
     "lerna": "^6.4.1"
