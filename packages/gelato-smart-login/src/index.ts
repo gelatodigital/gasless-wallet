@@ -4,18 +4,28 @@ import {
 } from "@gelatonetwork/account-abstraction";
 import { GelatoLogin } from "@gelatonetwork/login";
 import { SafeEventEmitterProvider } from "@web3auth/base";
+import { GelatoRelay } from "@gelatonetwork/relay-sdk";
 
 export type GelatoSmartWalletInterface = InstanceType<typeof GelatoSmartWallet>;
 
 export class GelatoSmartLogin extends GelatoLogin {
   #apiKey: string;
   #smartWallet: GelatoSmartWallet | null = null;
+  #gelatoRelay: GelatoRelay;
+
   constructor(chainId = 1, smartWalletConfig: SmartWalletConfig) {
     super(chainId);
+    this.#gelatoRelay = new GelatoRelay();
     this.#apiKey = smartWalletConfig.apiKey;
   }
 
   async init(): Promise<void> {
+    const isNetworkSupported = await this.#gelatoRelay.isNetworkSupported(
+      this._chainId
+    );
+    if (!isNetworkSupported) {
+      throw new Error(`Chain Id [${this._chainId}] is not supported`);
+    }
     await super.init();
     if (this._web3Auth?.provider) {
       await this._initializeSmartWallet();

@@ -50,8 +50,14 @@ export class GelatoSmartWallet {
   }
 
   public async init() {
-    this.#address = await this._calculateSmartWalletAddress();
     this.#chainId = (await this.#provider.getNetwork()).chainId;
+    const isNetworkSupported = await this.#gelatoRelay.isNetworkSupported(
+      this.#chainId
+    );
+    if (!isNetworkSupported) {
+      throw new Error(`Chain Id [${this.#chainId}] is not supported`);
+    }
+    this.#address = await this._calculateSmartWalletAddress();
     if (!this.#address || !this.#chainId) {
       throw new Error(
         `GelatoSmartWallet could not be initialized: address[${
