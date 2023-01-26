@@ -1,6 +1,6 @@
 {
   "name": "@gelatonetwork/smart-login",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "files": [
@@ -15,7 +15,7 @@
   },
   "dependencies": {
     "@gelatonetwork/account-abstraction": "^1.0.4",
-    "@gelatonetwork/login": "^1.0.1"
+    "@gelatonetwork/login": "^1.0.2"
   },
   "devDependencies": {
     "@tsconfig/recommended": "1.0.1",
