@@ -5,20 +5,45 @@ import {
   UserInfo,
   SafeEventEmitterProvider,
 } from "@web3auth/base";
-import { OpenloginAdapter } from "@web3auth/openlogin-adapter";
+import { OpenloginAdapter, LoginSettings } from "@web3auth/openlogin-adapter";
 import { WalletConnectV1Adapter } from "@web3auth/wallet-connect-v1-adapter";
 import { MetamaskAdapter } from "@web3auth/metamask-adapter";
 
 const CLIENT_ID =
   "BEfbM81WrVzaSbV7oZTCt3B47ttTgFIdFkTD7VAvwAzm0My7fBGg--GGruerQ8NK2HvnmjHbeT2skbLUe187GF0";
 
+export interface LoginConfig {
+  chain: { id: number; rpcUrl: string };
+  ui?: {
+    theme?: "light" | "dark";
+  };
+  openLogin?: {
+    mfa?: LoginSettings["mfaLevel"];
+    redirectUrl?: string;
+  };
+}
+
 export class GelatoLogin {
   protected _chainId: number;
   protected _web3Auth: Web3Auth | null = null;
   protected _provider: SafeEventEmitterProvider | null = null;
+  #loginConfig: Required<LoginConfig>;
 
-  constructor(chainId = 1) {
-    this._chainId = chainId;
+  constructor(loginConfig: LoginConfig) {
+    this._chainId = loginConfig.chain.id;
+    this.#loginConfig = {
+      chain: {
+        id: loginConfig.chain.id,
+        rpcUrl: loginConfig.chain.rpcUrl,
+      },
+      ui: {
+        theme: loginConfig.ui?.theme || undefined,
+      },
+      openLogin: {
+        mfa: loginConfig.openLogin?.mfa || undefined,
+        redirectUrl: loginConfig.openLogin?.redirectUrl || undefined,
+      },
+    };
   }
 
   async init(): Promise<void> {
@@ -27,10 +52,11 @@ export class GelatoLogin {
       chainConfig: {
         chainNamespace: CHAIN_NAMESPACES.EIP155,
         chainId: ethers.utils.hexValue(this._chainId),
+        rpcTarget: this.#loginConfig.chain.rpcUrl,
       },
       uiConfig: {
         appName: "Gelato",
-        theme: "dark",
+        theme: this.#loginConfig.ui.theme,
         loginMethodsOrder: ["google"],
         defaultLanguage: "en",
       },
@@ -39,7 +65,8 @@ export class GelatoLogin {
 
     const openloginAdapter = new OpenloginAdapter({
       loginSettings: {
-        mfaLevel: "optional",
+        mfaLevel: this.#loginConfig.openLogin.mfa,
+        redirectUrl: this.#loginConfig.openLogin.redirectUrl,
       },
       adapterSettings: {
         uxMode: "redirect",

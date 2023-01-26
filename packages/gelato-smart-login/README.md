@@ -16,28 +16,38 @@ SDK to directly import [web3Auth](https://web3auth.io/) features such as social 
 import {
   GelatoSmartLogin,
   GelatoSmartWalletInterface,
+  LoginConfig,
+  SmartWalletConfig,
 } from "@gelatonetwork/smart-login";
 ```
 
 ### Initialization
 
 ```
-const gelatoSmartLogin = new GelatoSmartLogin(CHAIN_ID, {
-    apiKey: "1BALANCE_API_KEY",
-});
-await gelatoSmartLogin.init()
+const smartWalletConfig: SmartWalletConfig = { apiKey };
+const loginConfig: LoginConfig = {
+  chain: {
+    id: CHAIN_ID,
+    rpcUrl: RPC_URL,
+  }
+};
+const gelatoSmartLogin = new GelatoSmartLogin(
+  loginConfig,
+  smartWalletConfig
+);
+await gelatoSmartLogin.init();
 ```
 
 ### Get Smart Wallet
 For all smart contract wallet methods and functionality, please go to [smart-wallet](../smart-wallet/README.md) package
 ```
-const smartWallet: GelatoSmartWalletInterface = gelatoSmartLogin.getSmartWallet()
+const smartWallet: GelatoSmartWalletInterface = gelatoSmartLogin.getSmartWallet();
 ```
 
 ### Get Provider
 
 ```
-gelatoSmartLogin.getProvider()
+gelatoSmartLogin.getProvider();
 ```
 
 ### Get User Info

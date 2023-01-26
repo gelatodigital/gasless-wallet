@@ -13,20 +13,26 @@ SDK to directly import [web3Auth](https://web3auth.io/) features such as social 
 ### Imports
 
 ```
-import { GelatoLogin } from "@gelatonetwork/login";
+import { GelatoLogin, LoginConfig } from "@gelatonetwork/login";
 ```
 
 ### Initialization
 
 ```
-const gelatoLogin = new GelatoLogin(CHAIN_ID)
-await gelatoLogin.init()
+const loginConfig: LoginConfig = {
+  chain: {
+    id: CHAIN_ID,
+    rpcUrl: RPC_URL,
+  }
+};
+const gelatoLogin = new GelatoLogin(loginConfig);
+await gelatoLogin.init();
 ```
 
 ### Get Provider
 
 ```
-gelatoLogin.getProvider()
+gelatoLogin.getProvider();
 ```
 
 ### Get User Info

@@ -2,19 +2,20 @@ import {
   GelatoSmartWallet,
   SmartWalletConfig,
 } from "@gelatonetwork/account-abstraction";
-import { GelatoLogin } from "@gelatonetwork/login";
+import { GelatoLogin, LoginConfig } from "@gelatonetwork/login";
 import { SafeEventEmitterProvider } from "@web3auth/base";
 import { GelatoRelay } from "@gelatonetwork/relay-sdk";
 
 export type GelatoSmartWalletInterface = InstanceType<typeof GelatoSmartWallet>;
+export { LoginConfig, SmartWalletConfig };
 
 export class GelatoSmartLogin extends GelatoLogin {
   #apiKey: string;
   #smartWallet: GelatoSmartWallet | null = null;
   #gelatoRelay: GelatoRelay;
 
-  constructor(chainId = 1, smartWalletConfig: SmartWalletConfig) {
-    super(chainId);
+  constructor(loginConfig: LoginConfig, smartWalletConfig: SmartWalletConfig) {
+    super(loginConfig);
     this.#gelatoRelay = new GelatoRelay();
     this.#apiKey = smartWalletConfig.apiKey;
   }
