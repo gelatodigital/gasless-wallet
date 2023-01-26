@@ -37,7 +37,7 @@ export class GelatoLogin {
         rpcUrl: loginConfig.chain.rpcUrl,
       },
       ui: {
-        theme: loginConfig.ui?.theme || undefined,
+        theme: loginConfig.ui?.theme || "light",
       },
       openLogin: {
         mfa: loginConfig.openLogin?.mfa || undefined,
@@ -73,7 +73,7 @@ export class GelatoLogin {
         whiteLabel: {
           name: "Gelato",
           defaultLanguage: "en",
-          dark: true,
+          dark: this.#loginConfig.ui.theme === "dark" ? true : false,
           theme: { primary: "#b45f63" },
         },
       },
