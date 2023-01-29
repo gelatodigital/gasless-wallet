@@ -23,6 +23,11 @@ export interface LoginConfig {
   };
 }
 
+export interface LoginOptions {
+web3AuthNetwork: 'testnet' | 'cyan',
+client_id:string
+}
+
 export class GelatoLogin {
   protected _chainId: number;
   protected _web3Auth: Web3Auth | null = null;
@@ -46,9 +51,9 @@ export class GelatoLogin {
     };
   }
 
-  async init(): Promise<void> {
+  async init(loginOptions:LoginOptions): Promise<void> {
     const web3Auth = new Web3Auth({
-      clientId: CLIENT_ID,
+      clientId: loginOptions.client_id,
       chainConfig: {
         chainNamespace: CHAIN_NAMESPACES.EIP155,
         chainId: ethers.utils.hexValue(this._chainId),
@@ -60,7 +65,7 @@ export class GelatoLogin {
         loginMethodsOrder: ["google"],
         defaultLanguage: "en",
       },
-      web3AuthNetwork: "cyan",
+      web3AuthNetwork: loginOptions.web3AuthNetwork,
     });
 
     const openloginAdapter = new OpenloginAdapter({
