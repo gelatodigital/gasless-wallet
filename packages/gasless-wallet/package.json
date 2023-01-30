@@ -1,7 +1,7 @@
 {
-  "name": "@gelatonetwork/account-abstraction",
-  "version": "1.0.5",
-  "description": "SDK for Account Abstraction",
+  "name": "@gelatonetwork/gasless-wallet",
+  "version": "0.0.1",
+  "description": "SDK for Gasless Wallet",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "files": [
@@ -22,7 +22,7 @@
     "typechain": "8.1.1"
   },
   "devDependencies": {
-    "@tsconfig/recommended": "1.0.1",
+    "@tsconfig/recommended": "^1.0.2",
     "@types/node": "18.11.18",
     "@typescript-eslint/eslint-plugin": "5.30.0",
     "@typescript-eslint/parser": "5.30.0",
