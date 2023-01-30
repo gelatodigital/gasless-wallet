@@ -1,6 +1,7 @@
 {
-  "name": "@gelatonetwork/login",
-  "version": "1.0.2",
+  "name": "@gelatonetwork/gasless-wallet",
+  "version": "0.0.0",
+  "description": "SDK for Gasless Wallet",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "files": [
@@ -8,18 +9,20 @@
   ],
   "license": "ISC",
   "scripts": {
-    "build": "yarn tsc",
+    "build": "rm -rf dist && yarn run generate:contracts:typings && yarn tsc",
     "format:check": "prettier --check \"*/**/*.{js,json,md,ts}\"",
+    "generate:contracts:typings": "yarn typechain --target=ethers-v5 --out-dir src/contracts/types src/contracts/abis/*.json",
     "format": "prettier --write */**/*.{js,json,md,ts}",
     "lint": "eslint --cache ."
   },
   "dependencies": {
-    "@walletconnect/client": "1.8.0",
-    "@web3auth/modal": "4.2.3",
-    "ethers": "5.7.2"
+    "@gelatonetwork/relay-sdk": "3.1.0",
+    "@typechain/ethers-v5": "10.2.0",
+    "ethers": "5.7.2",
+    "typechain": "8.1.1"
   },
   "devDependencies": {
-    "@tsconfig/recommended": "1.0.1",
+    "@tsconfig/recommended": "^1.0.2",
     "@types/node": "18.11.18",
     "@typescript-eslint/eslint-plugin": "5.30.0",
     "@typescript-eslint/parser": "5.30.0",

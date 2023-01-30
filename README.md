@@ -1,11 +1,11 @@
-# Gelato Account Abstraction
-Gelato's Account Abstraction implementation consists of 3 packages:
+# Gelato Gasless Wallet
 
-## [Gelato Smart Wallet SDK](./packages/smart-wallet/README.md)
+Gelato's Gasless Wallet implementation consists of 2 packages:
+
+## [Gasless Wallet SDK](./packages/gasless-wallet/)
+
 An account abstraction implementation that creates and uses EOA-owned Gnosis Safe Proxies, and relays the transactions using Gelato's 1Balance Service where the transactions can be sponsored by the Dapps.
 
-## [Gelato Login SDK](./packages/gelato-login/README.md)
-Web3Auth wrapper, ready-to-use and pluggable auth infrastructure for Web3 wallets and applications. Gelato Login provides Dapps the support of all social logins, and passwordless onboarding.
+## [Gasless Onboarding SDK](./packages/gasless-onboarding/)
 
-## [Gelato Smart Login SDK](./packages/gelato-smart-login/README.md)
-Combines both Gelato Smart Wallet SDK and Gelato Login SDK.
+Combines both Gasless Wallet SDK and Web3Auth.

@@ -21,10 +21,10 @@ import { MultiCallInterface, Multicall2 } from "./contracts/types/MultiCall";
 import { OperationType, SafeTxTypedData } from "./types";
 import { getMultiCallContractAddress } from "./utils";
 
-export interface SmartWalletConfig {
+export interface GaslessWalletConfig {
   apiKey: string;
 }
-export class GelatoSmartWallet {
+export class GaslessWallet {
   readonly #provider: ethers.providers.Web3Provider;
   #gelatoRelay: GelatoRelay;
   #address: string | undefined;
@@ -44,7 +44,7 @@ export class GelatoSmartWallet {
     eoaProvider:
       | ethers.providers.ExternalProvider
       | ethers.providers.JsonRpcFetchFunc,
-    config: SmartWalletConfig
+    config: GaslessWalletConfig
   ) {
     this.#gelatoRelay = new GelatoRelay();
     this.#provider = new ethers.providers.Web3Provider(eoaProvider);
@@ -62,7 +62,7 @@ export class GelatoSmartWallet {
     this.#address = await this._calculateSmartWalletAddress();
     if (!this.#address || !this.#chainId) {
       throw new Error(
-        `GelatoSmartWallet could not be initialized: address[${
+        `GaslessWallet could not be initialized: address[${
           this.#address
         }] chainId[${this.#chainId}]`
       );
@@ -88,7 +88,7 @@ export class GelatoSmartWallet {
     value: BigNumberish = 0
   ): Promise<RelayResponse> {
     if (!this.isInitialized() || !this.#address || !this.#chainId) {
-      throw new Error("GelatoSmartWallet is not initialized");
+      throw new Error("GaslessWallet is not initialized");
     }
     if (await this._checkIfDeployed()) {
       return await this.#gelatoRelay.sponsoredCall(
@@ -146,7 +146,7 @@ export class GelatoSmartWallet {
 
   private async _getSignature(to: string, data: string, value: BigNumberish) {
     if (!this.isInitialized() || !this.#address || !this.#chainId) {
-      throw new Error("GelatoSmartWallet is not initialized");
+      throw new Error("GaslessWallet is not initialized");
     }
     return await this.#provider.send(SIGNED_TYPE_DATA_METHOD, [
       await this.#provider.getSigner().getAddress(),
@@ -204,7 +204,7 @@ export class GelatoSmartWallet {
 
   private async _checkIfDeployed(): Promise<boolean> {
     if (!this.isInitialized() || !this.#address || !this.#chainId) {
-      throw new Error("GelatoSmartWallet is not initialized");
+      throw new Error("GaslessWallet is not initialized");
     }
     try {
       await GnosisSafe__factory.connect(
