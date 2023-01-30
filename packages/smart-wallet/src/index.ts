@@ -2,11 +2,12 @@ import { GelatoRelay, RelayResponse } from "@gelatonetwork/relay-sdk";
 import { BigNumber, BigNumberish, BytesLike, ethers } from "ethers";
 
 import {
-  EIP712_SAFE_TX_TYPE,
+  EIP712_SAFE_TX_TYPES,
   FALLBACK_HANDLER_ADDRESS,
   GNOSIS_SAFE,
   GNOSIS_SAFE_PROXY_FACTORY,
   SALT,
+  SIGNED_TYPE_DATA_METHOD,
   ZERO_ADDRESS,
 } from "./constants";
 import {
@@ -17,7 +18,8 @@ import {
 import { GnosisSafeInterface } from "./contracts/types/GnosisSafe";
 import { GnosisSafeProxyFactoryInterface } from "./contracts/types/GnosisSafeProxyFactory";
 import { MultiCallInterface, Multicall2 } from "./contracts/types/MultiCall";
-import { adjustVInSignature, getMultiCallContractAddress } from "./utils";
+import { OperationType, SafeTxTypedData } from "./types";
+import { getMultiCallContractAddress } from "./utils";
 
 export interface SmartWalletConfig {
   apiKey: string;
@@ -127,7 +129,7 @@ export class GelatoSmartWallet {
     data: string,
     value: BigNumberish
   ) {
-    const signature = await this._getSignedTransactionHash(to, data, value);
+    const signature = await this._getSignature(to, data, value);
     return this.#gnosisSafeInterface.encodeFunctionData("execTransaction", [
       to,
       value,
@@ -142,58 +144,56 @@ export class GelatoSmartWallet {
     ]);
   }
 
-  private async _getSignedTransactionHash(
-    to: string,
-    data: string,
-    value: BigNumberish
-  ) {
+  private async _getSignature(to: string, data: string, value: BigNumberish) {
     if (!this.isInitialized() || !this.#address || !this.#chainId) {
       throw new Error("GelatoSmartWallet is not initialized");
     }
-    const nonce = (await this.isDeployed())
-      ? (
-          await GnosisSafe__factory.connect(
-            this.#address,
-            this.#provider
-          ).nonce()
-        ).toNumber()
-      : 0;
-    const transactionHash = await this._getTransactionHash(
-      to,
-      data,
-      value,
-      nonce
-    );
-    const signedMessage = await this.#provider
-      .getSigner()
-      .signMessage(ethers.utils.arrayify(transactionHash));
-    return adjustVInSignature(signedMessage);
+    return await this.#provider.send(SIGNED_TYPE_DATA_METHOD, [
+      await this.#provider.getSigner().getAddress(),
+      JSON.stringify(
+        this._getSignTypedData(to, data, value, await this._getNonce())
+      ),
+    ]);
   }
 
-  private async _getTransactionHash(
+  private _getSignTypedData = (
     to: string,
     data: string,
     value: BigNumberish,
     nonce: number
-  ) {
-    const safeTx = {
-      to,
-      value,
-      data,
-      operation: 0,
-      safeTxGas: 0,
-      baseGas: 0,
-      gasPrice: 0,
-      gasToken: ZERO_ADDRESS,
-      refundReceiver: ZERO_ADDRESS,
-      nonce,
+  ): SafeTxTypedData => {
+    return {
+      types: EIP712_SAFE_TX_TYPES,
+      domain: {
+        chainId: this.#chainId,
+        verifyingContract: this.#address!,
+      },
+      primaryType: "SafeTx",
+      message: {
+        to,
+        value: BigNumber.from(value).toString(),
+        data,
+        operation: OperationType.Call,
+        safeTxGas: BigNumber.from(0).toString(),
+        baseGas: BigNumber.from(0).toString(),
+        gasPrice: BigNumber.from(0).toString(),
+        gasToken: ZERO_ADDRESS,
+        refundReceiver: ZERO_ADDRESS,
+        nonce: BigNumber.from(nonce).toString(),
+      },
     };
-    return ethers.utils._TypedDataEncoder.hash(
-      { verifyingContract: this.#address, chainId: this.#chainId },
-      EIP712_SAFE_TX_TYPE,
-      safeTx
-    );
-  }
+  };
+
+  private _getNonce = async (): Promise<number> => {
+    return (await this.isDeployed())
+      ? (
+          await GnosisSafe__factory.connect(
+            this.#address!,
+            this.#provider
+          ).nonce()
+        ).toNumber()
+      : 0;
+  };
 
   private async _getCreateProxyData(): Promise<string> {
     return this.#gnosisSafeProxyFactoryInterface.encodeFunctionData(

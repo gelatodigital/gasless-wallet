@@ -5,9 +5,19 @@ export const FALLBACK_HANDLER_ADDRESS =
   "0xf48f2B2d2a534e402487b3ee7C18c33Aec0Fe5e4";
 export const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000";
 export const SALT = 9314704;
+export const SIGNED_TYPE_DATA_METHOD = "eth_signTypedData_v4";
 
-export const EIP712_SAFE_TX_TYPE = {
-  // "SafeTx(address to,uint256 value,bytes data,uint8 operation,uint256 safeTxGas,uint256 baseGas,uint256 gasPrice,address gasToken,address refundReceiver,uint256 nonce)"
+export const EIP712_SAFE_TX_TYPES = {
+  EIP712Domain: [
+    {
+      type: "uint256",
+      name: "chainId",
+    },
+    {
+      type: "address",
+      name: "verifyingContract",
+    },
+  ],
   SafeTx: [
     { type: "address", name: "to" },
     { type: "uint256", name: "value" },
