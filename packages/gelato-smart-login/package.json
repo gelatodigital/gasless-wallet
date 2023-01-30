@@ -1,6 +1,6 @@
 {
   "name": "@gelatonetwork/smart-login",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "files": [
@@ -14,7 +14,7 @@
     "lint": "eslint --cache ."
   },
   "dependencies": {
-    "@gelatonetwork/account-abstraction": "^1.0.4",
+    "@gelatonetwork/account-abstraction": "^1.0.5",
     "@gelatonetwork/login": "^1.0.2"
   },
   "devDependencies": {
