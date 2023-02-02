@@ -12,7 +12,7 @@ SDK to directly import [web3Auth](https://web3auth.io/) features such as social 
 
 ### Imports
 
-```
+```typescript
 import {
   GaslessOnboarding,
   GaslessWalletConfig,
@@ -23,7 +23,7 @@ import {
 
 ### Initialization
 
-```
+```typescript
 const gaslessWalletConfig: GaslessWalletConfig = { apiKey };
 const loginConfig: LoginConfig = {
   chain: {
@@ -40,26 +40,26 @@ await gaslessOnboarding.init();
 
 ### Get Gasless Wallet
 For all gasless smart contract wallet methods and functionality, please go to [gasless-wallet](../gasless-wallet/) package
-```
+```typescript
 const gaslessWallet: GaslessWalletInterface = gaslessOnboarding.getGaslessWallet();
 ```
 
 ### Get Provider
 
-```
+```typescript
 gaslessOnboarding.getProvider();
 ```
 
 ### Get User Info
 Returns optional user info such as email, name, profileImage if logged in with Social Media Accounts
 
-```
+```typescript
 await gaslessOnboarding.getUserInfo();
 ```
 
 ### Login & Logout
 
-```
+```typescript
 await gaslessOnboarding.login();
 await gaslessOnboarding.logout();
 ```
