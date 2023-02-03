@@ -18,8 +18,11 @@ import {
 import { GnosisSafeInterface } from "./contracts/types/GnosisSafe";
 import { GnosisSafeProxyFactoryInterface } from "./contracts/types/GnosisSafeProxyFactory";
 import { MultiCallInterface, Multicall2 } from "./contracts/types/MultiCall";
+import { ErrorTypes, GaslessWalletError } from "./errors";
 import { OperationType, SafeTxTypedData, TransactionData } from "./types";
 import { getMultiCallContractAddress } from "./utils";
+
+export { ErrorTypes, GaslessWalletError };
 
 type EoaProvider =
   | ethers.providers.ExternalProvider
@@ -34,7 +37,7 @@ export class GaslessWallet {
   #address: string | undefined;
   #chainId: number | undefined;
   #apiKey: string;
-  #isInitialized = false;
+  #isInitiated = false;
 
   // Contract Interfaces
   readonly #gnosisSafeInterface: GnosisSafeInterface =
@@ -56,41 +59,52 @@ export class GaslessWallet {
   }
 
   /**
-   * Initializes the GaslessWallet, required before invoking the other methods
+   * Initiates the GaslessWallet, required before invoking the other methods
    *
    */
   public async init(): Promise<void> {
     this.#chainId = (await this.#provider.getNetwork()).chainId;
+    if (!this.#chainId) {
+      throw new GaslessWalletError(
+        ErrorTypes.WalletNotInitiated,
+        `Chain Id is not found`
+      );
+    }
     const isNetworkSupported = await this.#gelatoRelay.isNetworkSupported(
       this.#chainId
     );
     if (!isNetworkSupported) {
-      throw new Error(`Chain Id [${this.#chainId}] is not supported`);
-    }
-    this.#address = await this._calculateSmartWalletAddress();
-    if (!this.#address || !this.#chainId) {
-      throw new Error(
-        `GaslessWallet could not be initialized: address[${
-          this.#address
-        }] chainId[${this.#chainId}]`
+      throw new GaslessWalletError(
+        ErrorTypes.UnsupportedNetwork,
+        `Chain Id [${this.#chainId}]`
       );
     }
-    this.#isInitialized = true;
+    this.#address = await this._calculateSmartWalletAddress();
+    if (!this.#address) {
+      throw new GaslessWalletError(
+        ErrorTypes.WalletNotInitiated,
+        `Address could not be predicted`
+      );
+    }
+    this.#isInitiated = true;
   }
 
   /**
    * @returns {boolean} Whether the init function of the GaslessWallet was invoked or not
    *
    */
-  public isInitialized(): boolean {
-    return this.#isInitialized;
+  public isInitiated(): boolean {
+    return this.#isInitiated;
   }
 
   /**
-   * @returns {string | undefined} The address of the GaslessWallet
+   * @returns {string} The address of the GaslessWallet
    *
    */
-  public getAddress(): string | undefined {
+  public getAddress(): string {
+    if (!this.#address) {
+      throw new GaslessWalletError(ErrorTypes.WalletNotInitiated);
+    }
     return this.#address;
   }
 
@@ -99,7 +113,18 @@ export class GaslessWallet {
    *
    */
   public async isDeployed(): Promise<boolean> {
-    return await this._checkIfDeployed();
+    if (!this.isInitiated() || !this.#address || !this.#chainId) {
+      throw new GaslessWalletError(ErrorTypes.WalletNotInitiated);
+    }
+    try {
+      await GnosisSafe__factory.connect(
+        this.#address,
+        this.#provider
+      ).deployed();
+      return true;
+    } catch (error) {
+      return false;
+    }
   }
 
   /**
@@ -115,10 +140,10 @@ export class GaslessWallet {
     data: string,
     value: BigNumberish = 0
   ): Promise<TransactionData> {
-    if (!this.isInitialized() || !this.#address || !this.#chainId) {
-      throw new Error("GaslessWallet is not initialized");
+    if (!this.isInitiated() || !this.#address || !this.#chainId) {
+      throw new GaslessWalletError(ErrorTypes.WalletNotInitiated);
     }
-    if (await this._checkIfDeployed()) {
+    if (await this.isDeployed()) {
       return {
         chainId: this.#chainId,
         target: this.#address,
@@ -195,9 +220,6 @@ export class GaslessWallet {
   }
 
   private async _getSignature(to: string, data: string, value: BigNumberish) {
-    if (!this.isInitialized() || !this.#address || !this.#chainId) {
-      throw new Error("GaslessWallet is not initialized");
-    }
     return await this.#provider.send(SIGNED_TYPE_DATA_METHOD, [
       await this.#provider.getSigner().getAddress(),
       JSON.stringify(
@@ -250,21 +272,6 @@ export class GaslessWallet {
       "createProxyWithNonce",
       [GNOSIS_SAFE, await this._getSafeInitializer(), BigNumber.from(SALT)]
     );
-  }
-
-  private async _checkIfDeployed(): Promise<boolean> {
-    if (!this.isInitialized() || !this.#address || !this.#chainId) {
-      throw new Error("GaslessWallet is not initialized");
-    }
-    try {
-      await GnosisSafe__factory.connect(
-        this.#address,
-        this.#provider
-      ).deployed();
-      return true;
-    } catch (error) {
-      return false;
-    }
   }
 
   private async _calculateSmartWalletAddress(): Promise<string> {
