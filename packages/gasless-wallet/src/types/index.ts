@@ -34,3 +34,9 @@ interface Eip712MessageTypes {
     name: string;
   }[];
 }
+
+export interface TransactionData {
+  chainId: number;
+  target: string;
+  data: string;
+}

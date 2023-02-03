@@ -1,6 +1,6 @@
 {
   "name": "@gelatonetwork/gasless-onboarding",
-  "version": "0.0.1",
+  "version": "0.0.2-alpha.1",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "description": "SDK for Gasless Onboarding",
@@ -15,7 +15,7 @@
     "lint": "eslint --cache ."
   },
   "dependencies": {
-    "@gelatonetwork/gasless-wallet": "^0.0.1",
+    "@gelatonetwork/gasless-wallet": "^0.0.2-alpha.1",
     "@walletconnect/client": "1.8.0",
     "@web3auth/modal": "4.2.3"
   },

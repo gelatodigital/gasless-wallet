@@ -39,6 +39,11 @@ export class GaslessOnboarding {
   #gaslessWallet: GaslessWallet | null = null;
   #gelatoRelay: GelatoRelay;
 
+  /**
+   * @param {LoginConfig} loginConfig - The configuration for Web3Auth
+   * @param {GaslessWalletConfig} gaslessWalletConfig - The configuration for the Gasless Wallet
+   *
+   */
   constructor(
     loginConfig: LoginConfig,
     gaslessWalletConfig: GaslessWalletConfig
@@ -61,6 +66,10 @@ export class GaslessOnboarding {
     this.#apiKey = gaslessWalletConfig.apiKey;
   }
 
+  /**
+   * Initializes the GaslessOnboarding instance, required before invoking the other methods
+   *
+   */
   async init(): Promise<void> {
     const isNetworkSupported = await this.#gelatoRelay.isNetworkSupported(
       this.#chainId
@@ -119,10 +128,18 @@ export class GaslessOnboarding {
     this.#web3Auth = web3Auth;
   }
 
+  /**
+   * @returns {SafeEventEmitterProvider | null} The SafeEventEmitterProvider object or null if not logged in
+   *
+   */
   getProvider(): SafeEventEmitterProvider | null {
     return this.#provider;
   }
 
+  /**
+   * @returns {Promise<Partial<UserInfo>>} The user information if logged in with social media accounts
+   *
+   */
   async getUserInfo(): Promise<Partial<UserInfo>> {
     if (!this.#web3Auth) {
       throw new Error("GaslessOnboarding is not initialized yet");
@@ -130,6 +147,11 @@ export class GaslessOnboarding {
     return await this.#web3Auth.getUserInfo();
   }
 
+  /**
+   * Pops up the login modal
+   * @returns {Promise<SafeEventEmitterProvider>} The SafeEventEmitterProvider object
+   *
+   */
   async login(): Promise<SafeEventEmitterProvider> {
     if (!this.#web3Auth) {
       throw new Error("GaslessOnboarding is not initialized yet");
@@ -143,6 +165,10 @@ export class GaslessOnboarding {
     return provider;
   }
 
+  /**
+   * Logs the user out, clears the cache
+   *
+   */
   async logout(): Promise<void> {
     if (!this.#web3Auth) {
       throw new Error("GaslessOnboarding is not initialized yet");
@@ -152,6 +178,10 @@ export class GaslessOnboarding {
     this.#provider = null;
   }
 
+  /**
+   * @returns {GaslessWallet} The GaslessWallet of the user
+   *
+   */
   getGaslessWallet(): GaslessWallet {
     if (!this.#provider || !this.#gaslessWallet) {
       throw new Error("Not logged in with Gasless Onboarding");

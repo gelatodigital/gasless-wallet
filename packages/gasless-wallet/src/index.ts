@@ -18,8 +18,12 @@ import {
 import { GnosisSafeInterface } from "./contracts/types/GnosisSafe";
 import { GnosisSafeProxyFactoryInterface } from "./contracts/types/GnosisSafeProxyFactory";
 import { MultiCallInterface, Multicall2 } from "./contracts/types/MultiCall";
-import { OperationType, SafeTxTypedData } from "./types";
+import { OperationType, SafeTxTypedData, TransactionData } from "./types";
 import { getMultiCallContractAddress } from "./utils";
+
+type EoaProvider =
+  | ethers.providers.ExternalProvider
+  | ethers.providers.JsonRpcFetchFunc;
 
 export interface GaslessWalletConfig {
   apiKey: string;
@@ -40,18 +44,22 @@ export class GaslessWallet {
   readonly #multiCallInterface: MultiCallInterface =
     MultiCall__factory.createInterface();
 
-  constructor(
-    eoaProvider:
-      | ethers.providers.ExternalProvider
-      | ethers.providers.JsonRpcFetchFunc,
-    config: GaslessWalletConfig
-  ) {
+  /**
+   * @param {EoaProvider} eoaProvider - The EOA Provider
+   * @param {GaslessWalletConfig} config - The configuration for the Gasless Wallet
+   *
+   */
+  constructor(eoaProvider: EoaProvider, config: GaslessWalletConfig) {
     this.#gelatoRelay = new GelatoRelay();
     this.#provider = new ethers.providers.Web3Provider(eoaProvider);
     this.#apiKey = config.apiKey;
   }
 
-  public async init() {
+  /**
+   * Initializes the GaslessWallet, required before invoking the other methods
+   *
+   */
+  public async init(): Promise<void> {
     this.#chainId = (await this.#provider.getNetwork()).chainId;
     const isNetworkSupported = await this.#gelatoRelay.isNetworkSupported(
       this.#chainId
@@ -70,35 +78,52 @@ export class GaslessWallet {
     this.#isInitialized = true;
   }
 
+  /**
+   * @returns {boolean} Whether the init function of the GaslessWallet was invoked or not
+   *
+   */
   public isInitialized(): boolean {
     return this.#isInitialized;
   }
 
-  public getAddress() {
+  /**
+   * @returns {string | undefined} The address of the GaslessWallet
+   *
+   */
+  public getAddress(): string | undefined {
     return this.#address;
   }
 
-  public async isDeployed() {
+  /**
+   * @returns {Promise<boolean>} Whether the GaslessWallet has already been deployed or not
+   *
+   */
+  public async isDeployed(): Promise<boolean> {
     return await this._checkIfDeployed();
   }
 
-  public async sendTransaction(
+  /**
+   * Populates the transaction data for relaying
+   * @param {string} to - The target address
+   * @param {string} data - The transaction data
+   * @param {BigNumberish} [value] - Optional value for payable
+   * @returns {Promise<TransactionData>} TransactionData
+   *
+   */
+  public async populateSponsorTransaction(
     to: string,
     data: string,
     value: BigNumberish = 0
-  ): Promise<RelayResponse> {
+  ): Promise<TransactionData> {
     if (!this.isInitialized() || !this.#address || !this.#chainId) {
       throw new Error("GaslessWallet is not initialized");
     }
     if (await this._checkIfDeployed()) {
-      return await this.#gelatoRelay.sponsoredCall(
-        {
-          chainId: this.#chainId,
-          target: this.#address,
-          data: await this._getExecTransactionData(to, data, value),
-        },
-        this.#apiKey
-      );
+      return {
+        chainId: this.#chainId,
+        target: this.#address,
+        data: await this._getExecTransactionData(to, data, value),
+      };
     }
     const calls: Multicall2.CallStruct[] = [
       {
@@ -114,11 +139,36 @@ export class GaslessWallet {
       "aggregate",
       [calls]
     );
+    return {
+      chainId: this.#chainId,
+      target: getMultiCallContractAddress(this.#chainId),
+      data: multiCallData,
+    };
+  }
+
+  /**
+   * Relays the transaction with the provided data to the target address by using Gelato's 1Balance
+   * @param {string} to - The target address
+   * @param {string} data - The transaction data
+   * @param {BigNumberish} [value] - Optional value for payable
+   * @returns {Promise<RelayResponse>} Response object with taskId parameter
+   *
+   */
+  public async sponsorTransaction(
+    to: string,
+    data: string,
+    value: BigNumberish = 0
+  ): Promise<RelayResponse> {
+    const {
+      chainId,
+      data: populatedData,
+      target,
+    } = await this.populateSponsorTransaction(to, data, value);
     return await this.#gelatoRelay.sponsoredCall(
       {
-        chainId: this.#chainId,
-        target: getMultiCallContractAddress(this.#chainId),
-        data: multiCallData,
+        chainId,
+        target,
+        data: populatedData,
       },
       this.#apiKey
     );
