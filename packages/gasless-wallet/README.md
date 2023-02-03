@@ -13,7 +13,10 @@ GaslessWallet is the main class where the developers can create smart contract w
 ### Imports
 
 ```typescript
-import { GaslessWallet, GaslessWalletConfig } from "@gelatonetwork/gasless-wallet"
+import {
+  GaslessWallet,
+  GaslessWalletConfig,
+} from "@gelatonetwork/gasless-wallet";
 import { ethers } from "ethers";
 ```
 
@@ -43,7 +46,7 @@ const gaslessWalletContractAddress = gaslessWallet.getAddress();
 
 ```typescript
 const isGaslessWalletAlreadyDeployed = await gaslessWallet.isDeployed();
-const isGaslessWalletAlreadyInitialized = gaslessWallet.isInitiated();
+const isGaslessWalletAlreadyInitiated = gaslessWallet.isInitiated();
 ```
 
 ### Sponsor Transaction
@@ -51,5 +54,8 @@ const isGaslessWalletAlreadyInitialized = gaslessWallet.isInitiated();
 Sponsored Transaction that is sent through EOA's Gnosis Safe Proxy
 
 ```typescript
-const { taskId } = await gaslessWallet.sponsorTransaction(TARGET_ADDRESS, TX_DATA);
+const { taskId } = await gaslessWallet.sponsorTransaction(
+  TARGET_ADDRESS,
+  TX_DATA
+);
 ```
