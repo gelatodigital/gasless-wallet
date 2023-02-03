@@ -23,9 +23,10 @@ import { GelatoRelay } from "@gelatonetwork/relay-sdk";
 // Others
 import { ethers } from "ethers";
 import { LoginConfig } from "./types";
+import { ErrorTypes, GaslessOnboardingError } from "./errors";
 
 export type GaslessWalletInterface = InstanceType<typeof GaslessWallet>;
-export { LoginConfig, GaslessWalletConfig };
+export { LoginConfig, GaslessWalletConfig, GaslessOnboardingError, ErrorTypes };
 
 const CLIENT_ID =
   "BEfbM81WrVzaSbV7oZTCt3B47ttTgFIdFkTD7VAvwAzm0My7fBGg--GGruerQ8NK2HvnmjHbeT2skbLUe187GF0";
@@ -67,7 +68,7 @@ export class GaslessOnboarding {
   }
 
   /**
-   * Initializes the GaslessOnboarding instance, required before invoking the other methods
+   * Initiates the GaslessOnboarding instance, required before invoking the other methods
    *
    */
   async init(): Promise<void> {
@@ -75,7 +76,10 @@ export class GaslessOnboarding {
       this.#chainId
     );
     if (!isNetworkSupported) {
-      throw new Error(`Chain Id [${this.#chainId}] is not supported`);
+      throw new GaslessOnboardingError(
+        ErrorTypes.UnsupportedNetwork,
+        `Chain Id [${this.#chainId}]`
+      );
     }
     const web3Auth = new Web3Auth({
       clientId: CLIENT_ID,
@@ -129,7 +133,7 @@ export class GaslessOnboarding {
   }
 
   /**
-   * @returns {SafeEventEmitterProvider | null} The SafeEventEmitterProvider object or null if not logged in
+   * @returns {SafeEventEmitterProvider | null} The SafeEventEmitterProvider object or null if the user is not logged in yet
    *
    */
   getProvider(): SafeEventEmitterProvider | null {
@@ -142,7 +146,7 @@ export class GaslessOnboarding {
    */
   async getUserInfo(): Promise<Partial<UserInfo>> {
     if (!this.#web3Auth) {
-      throw new Error("GaslessOnboarding is not initialized yet");
+      throw new GaslessOnboardingError(ErrorTypes.OnboardingNotInitiated);
     }
     return await this.#web3Auth.getUserInfo();
   }
@@ -154,11 +158,11 @@ export class GaslessOnboarding {
    */
   async login(): Promise<SafeEventEmitterProvider> {
     if (!this.#web3Auth) {
-      throw new Error("GaslessOnboarding is not initialized yet");
+      throw new GaslessOnboardingError(ErrorTypes.OnboardingNotInitiated);
     }
     const provider = await this.#web3Auth.connect();
     if (!provider) {
-      throw new Error("Could not be logged in with Gasless Onboarding");
+      throw new GaslessOnboardingError(ErrorTypes.LoginFailed);
     }
     this.#provider = provider;
     await this._initializeGaslessWallet();
@@ -171,7 +175,7 @@ export class GaslessOnboarding {
    */
   async logout(): Promise<void> {
     if (!this.#web3Auth) {
-      throw new Error("GaslessOnboarding is not initialized yet");
+      throw new GaslessOnboardingError(ErrorTypes.OnboardingNotInitiated);
     }
     await this.#web3Auth.logout();
     this.#web3Auth.clearCache();
@@ -184,14 +188,14 @@ export class GaslessOnboarding {
    */
   getGaslessWallet(): GaslessWallet {
     if (!this.#provider || !this.#gaslessWallet) {
-      throw new Error("Not logged in with Gasless Onboarding");
+      throw new GaslessOnboardingError(ErrorTypes.NotLoggedIn);
     }
     return this.#gaslessWallet;
   }
 
   private async _initializeGaslessWallet(): Promise<void> {
     if (!this.#provider) {
-      throw new Error("Not logged in with Gasless Onboarding");
+      throw new GaslessOnboardingError(ErrorTypes.NotLoggedIn);
     }
     const gaslessWallet = new GaslessWallet(this.#provider, {
       apiKey: this.#apiKey,

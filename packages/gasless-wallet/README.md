@@ -43,13 +43,13 @@ const gaslessWalletContractAddress = gaslessWallet.getAddress();
 
 ```typescript
 const isGaslessWalletAlreadyDeployed = await gaslessWallet.isDeployed();
-const isGaslessWalletAlreadyInitialized = gaslessWallet.isInitialized();
+const isGaslessWalletAlreadyInitialized = gaslessWallet.isInitiated();
 ```
 
-### Send Transaction
+### Sponsor Transaction
 
 Sponsored Transaction that is sent through EOA's Gnosis Safe Proxy
 
 ```typescript
-const { taskId } = await gaslessWallet.sendTransaction(TARGET_ADDRESS, TX_DATA);
+const { taskId } = await gaslessWallet.sponsorTransaction(TARGET_ADDRESS, TX_DATA);
 ```
