@@ -7,7 +7,10 @@ import {
 } from "@web3auth/base";
 
 // Web3Auth Adapters
-import { OpenloginAdapter } from "@web3auth/openlogin-adapter";
+import {
+  OpenloginAdapter,
+  OpenloginAdapterOptions,
+} from "@web3auth/openlogin-adapter";
 import { WalletConnectV1Adapter } from "@web3auth/wallet-connect-v1-adapter";
 import { MetamaskAdapter } from "@web3auth/metamask-adapter";
 
@@ -97,11 +100,16 @@ export class GaslessOnboarding {
       web3AuthNetwork: "cyan",
     });
 
+    const loginSettings: OpenloginAdapterOptions["loginSettings"] = this
+      .#loginConfig.openLogin.redirectUrl
+      ? {
+          mfaLevel: this.#loginConfig.openLogin.mfa,
+          redirectUrl: this.#loginConfig.openLogin.redirectUrl,
+        }
+      : { mfaLevel: this.#loginConfig.openLogin.mfa };
+
     const openloginAdapter = new OpenloginAdapter({
-      loginSettings: {
-        mfaLevel: this.#loginConfig.openLogin.mfa,
-        redirectUrl: this.#loginConfig.openLogin.redirectUrl,
-      },
+      loginSettings,
       adapterSettings: {
         uxMode: "redirect",
         whiteLabel: {
