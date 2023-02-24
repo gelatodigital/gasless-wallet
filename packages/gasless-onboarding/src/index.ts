@@ -27,6 +27,7 @@ import { GelatoRelay } from "@gelatonetwork/relay-sdk";
 import { ethers } from "ethers";
 import { LoginConfig } from "./types";
 import { ErrorTypes, GaslessOnboardingError } from "./errors";
+import { getSignatures } from "./utils";
 
 export type GaslessWalletInterface = InstanceType<typeof GaslessWallet>;
 export { LoginConfig, GaslessWalletConfig, GaslessOnboardingError, ErrorTypes };
@@ -54,6 +55,7 @@ export class GaslessOnboarding {
   ) {
     this.#chainId = loginConfig.chain.id;
     this.#loginConfig = {
+      domains: loginConfig.domains,
       chain: {
         id: loginConfig.chain.id,
         rpcUrl: loginConfig.chain.rpcUrl,
@@ -84,6 +86,9 @@ export class GaslessOnboarding {
         `Chain Id [${this.#chainId}]`
       );
     }
+    const originData = this.#loginConfig.domains.length
+      ? await getSignatures(this.#loginConfig.domains)
+      : {};
     const web3Auth = new Web3Auth({
       clientId: CLIENT_ID,
       chainConfig: {
@@ -118,6 +123,7 @@ export class GaslessOnboarding {
           dark: this.#loginConfig.ui.theme === "dark" ? true : false,
           theme: { primary: "#b45f63" },
         },
+        originData,
       },
     });
 
