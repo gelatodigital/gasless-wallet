@@ -26,6 +26,7 @@ import {
 ```typescript
 const gaslessWalletConfig: GaslessWalletConfig = { apiKey };
 const loginConfig: LoginConfig = {
+  domains: [window.location.origin],
   chain: {
     id: CHAIN_ID,
     rpcUrl: RPC_URL,
