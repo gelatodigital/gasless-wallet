@@ -3,9 +3,6 @@ import { BigNumber, BigNumberish, BytesLike, ethers } from "ethers";
 
 import {
   EIP712_SAFE_TX_TYPES,
-  FALLBACK_HANDLER_ADDRESS,
-  GNOSIS_SAFE,
-  GNOSIS_SAFE_PROXY_FACTORY,
   SALT,
   SIGNED_TYPE_DATA_METHOD,
   ZERO_ADDRESS,
@@ -21,6 +18,7 @@ import { MultiCallInterface, Multicall2 } from "./contracts/types/MultiCall";
 import { ErrorTypes, GaslessWalletError } from "./errors";
 import { OperationType, SafeTxTypedData, TransactionData } from "./types";
 import { getMultiCallContractAddress } from "./utils";
+import { getSafeContractAddresses, SafeAddressBook } from "./utils";
 
 export { ErrorTypes, GaslessWalletError };
 
@@ -38,6 +36,7 @@ export class GaslessWallet {
   #chainId: number | undefined;
   #apiKey: string;
   #isInitiated = false;
+  #safeAddressBook: SafeAddressBook | undefined;
 
   // Contract Interfaces
   readonly #gnosisSafeInterface: GnosisSafeInterface =
@@ -79,6 +78,7 @@ export class GaslessWallet {
         `Chain Id [${this.#chainId}]`
       );
     }
+    this.#safeAddressBook = getSafeContractAddresses(this.#chainId);
     this.#address = await this._calculateSmartWalletAddress();
     if (!this.#address) {
       throw new GaslessWalletError(
@@ -152,7 +152,7 @@ export class GaslessWallet {
     }
     const calls: Multicall2.CallStruct[] = [
       {
-        target: GNOSIS_SAFE_PROXY_FACTORY,
+        target: this.#safeAddressBook!.gnosisSafeProxyFactory,
         callData: await this._getCreateProxyData(),
       },
       {
@@ -270,7 +270,11 @@ export class GaslessWallet {
   private async _getCreateProxyData(): Promise<string> {
     return this.#gnosisSafeProxyFactoryInterface.encodeFunctionData(
       "createProxyWithNonce",
-      [GNOSIS_SAFE, await this._getSafeInitializer(), BigNumber.from(SALT)]
+      [
+        this.#safeAddressBook!.gnosisSafe,
+        await this._getSafeInitializer(),
+        BigNumber.from(SALT),
+      ]
     );
   }
 
@@ -279,10 +283,10 @@ export class GaslessWallet {
       ["bytes", "uint256"],
       [
         await GnosisSafeProxyFactory__factory.connect(
-          GNOSIS_SAFE_PROXY_FACTORY,
+          this.#safeAddressBook!.gnosisSafeProxyFactory,
           this.#provider
         ).proxyCreationCode(),
-        GNOSIS_SAFE,
+        this.#safeAddressBook!.gnosisSafe,
       ]
     );
     const salt = ethers.utils.solidityKeccak256(
@@ -296,7 +300,7 @@ export class GaslessWallet {
       ]
     );
     return ethers.utils.getCreate2Address(
-      GNOSIS_SAFE_PROXY_FACTORY,
+      this.#safeAddressBook!.gnosisSafeProxyFactory,
       salt,
       ethers.utils.keccak256(deploymentCode)
     );
@@ -309,7 +313,7 @@ export class GaslessWallet {
       BigNumber.from(1),
       ZERO_ADDRESS,
       "0x",
-      FALLBACK_HANDLER_ADDRESS,
+      this.#safeAddressBook!.fallbackHandler,
       ZERO_ADDRESS,
       BigNumber.from(0),
       ZERO_ADDRESS,

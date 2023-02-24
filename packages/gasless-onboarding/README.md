@@ -63,3 +63,9 @@ await gaslessOnboarding.getUserInfo();
 await gaslessOnboarding.login();
 await gaslessOnboarding.logout();
 ```
+
+## Troubleshooting
+
+### Webpack 5 Polyfills Issue 
+Please [visit Web3Auth](https://web3auth.io/docs/troubleshooting/webpack-issues) for the solution.
+
