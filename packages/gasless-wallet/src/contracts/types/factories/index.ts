@@ -3,4 +3,5 @@
 /* eslint-disable */
 export { GnosisSafe__factory } from "./GnosisSafe__factory";
 export { GnosisSafeProxyFactory__factory } from "./GnosisSafeProxyFactory__factory";
+export { Migration__factory } from "./Migration__factory";
 export { MultiCall__factory } from "./MultiCall__factory";

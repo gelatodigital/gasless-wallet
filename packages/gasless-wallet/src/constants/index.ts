@@ -1,3 +1,5 @@
+import { SafeAddressBook } from "../utils";
+
 export const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000";
 export const SALT = 9314704;
 export const SIGNED_TYPE_DATA_METHOD = "eth_signTypedData_v4";
@@ -25,4 +27,10 @@ export const EIP712_SAFE_TX_TYPES = {
     { type: "address", name: "refundReceiver" },
     { type: "uint256", name: "nonce" },
   ],
+};
+
+export const DEFAULT_SAFE_ADDRESS_BOOK: SafeAddressBook = {
+  fallbackHandler: "0xf48f2B2d2a534e402487b3ee7C18c33Aec0Fe5e4",
+  gnosisSafe: "0xd9Db270c1B5E3Bd161E8c8503c55cEABeE709552",
+  gnosisSafeProxyFactory: "0xa6B71E26C5e0845f74c812102Ca7114b6a896AB2",
 };

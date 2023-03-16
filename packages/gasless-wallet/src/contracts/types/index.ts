@@ -3,8 +3,10 @@
 /* eslint-disable */
 export type { GnosisSafe } from "./GnosisSafe";
 export type { GnosisSafeProxyFactory } from "./GnosisSafeProxyFactory";
+export type { Migration } from "./Migration";
 export type { MultiCall } from "./MultiCall";
 export * as factories from "./factories";
 export { GnosisSafe__factory } from "./factories/GnosisSafe__factory";
 export { GnosisSafeProxyFactory__factory } from "./factories/GnosisSafeProxyFactory__factory";
+export { Migration__factory } from "./factories/Migration__factory";
 export { MultiCall__factory } from "./factories/MultiCall__factory";
