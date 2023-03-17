@@ -40,7 +40,7 @@ export class GaslessOnboarding {
   #web3Auth: Web3Auth | null = null;
   #provider: SafeEventEmitterProvider | null = null;
   #loginConfig: Required<LoginConfig>;
-  #apiKey: string;
+  #apiKey: string | undefined;
   #gaslessWallet: GaslessWallet | null = null;
   #gelatoRelay: GelatoRelay;
 

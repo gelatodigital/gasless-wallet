@@ -27,14 +27,14 @@ type EoaProvider =
   | ethers.providers.JsonRpcFetchFunc;
 
 export interface GaslessWalletConfig {
-  apiKey: string;
+  apiKey?: string;
 }
 export class GaslessWallet {
   readonly #provider: ethers.providers.Web3Provider;
   #gelatoRelay: GelatoRelay;
   #address: string | undefined;
   #chainId: number | undefined;
-  #apiKey: string;
+  #apiKey: string | undefined;
   #isInitiated = false;
   #safeAddressBook: SafeAddressBook | undefined;
 
@@ -184,6 +184,9 @@ export class GaslessWallet {
     data: string,
     value: BigNumberish = 0
   ): Promise<RelayResponse> {
+    if (!this.#apiKey) {
+      throw new GaslessWalletError(ErrorTypes.ApiKeyNotProvided);
+    }
     const {
       chainId,
       data: populatedData,
