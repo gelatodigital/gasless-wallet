@@ -1,6 +1,6 @@
 {
   "name": "@gelatonetwork/gasless-onboarding",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "description": "SDK for Gasless Onboarding",
@@ -16,7 +16,7 @@
   },
   "dependencies": {
     "@coinbase/wallet-sdk": "3.6.5",
-    "@gelatonetwork/gasless-wallet": "^0.0.3",
+    "@gelatonetwork/gasless-wallet": "^0.0.4",
     "@walletconnect/client": "1.8.0",
     "@web3auth/base": "5.1.0",
     "@web3auth/coinbase-adapter": "5.1.0",
