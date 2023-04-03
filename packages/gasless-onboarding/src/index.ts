@@ -13,6 +13,7 @@ import {
 } from "@web3auth/openlogin-adapter";
 import { WalletConnectV1Adapter } from "@web3auth/wallet-connect-v1-adapter";
 import { MetamaskAdapter } from "@web3auth/metamask-adapter";
+import { CoinbaseAdapter } from "@web3auth/coinbase-adapter";
 
 // Gasless-Wallet
 import {
@@ -135,9 +136,15 @@ export class GaslessOnboarding {
       clientId: CLIENT_ID,
     });
 
+    const coinbaseAdapter = new CoinbaseAdapter({
+      clientId: CLIENT_ID,
+    });
+
     web3Auth.configureAdapter(openloginAdapter);
     web3Auth.configureAdapter(walletConnectV1Adapter);
     web3Auth.configureAdapter(metamaskAdapter);
+    web3Auth.configureAdapter(coinbaseAdapter);
+
     await web3Auth.initModal();
     if (web3Auth.provider) {
       this.#provider = web3Auth.provider;
